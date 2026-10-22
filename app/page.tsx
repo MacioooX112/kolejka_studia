@@ -1,69 +1,124 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { zajecia } from './types/types';
+
+
+export default function LandingPage() {
+  const [classes, setClasses] = useState<zajecia[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // -------------------------------------------------------------
+    // Endpoint: /api/getClassesForLanding
+    // Opis działania: 
+    // Endpoint pobiera z bazy danych (Prisma) listę zajęć, w której 
+    // Data jest większa bądź równa aktualnej (Data >= now), posortowaną rosnąco.
+    // Zwraca tablicę obiektów zajęć (zawierającą id, Data, przedmiot, link_do_zadań).
+    // -------------------------------------------------------------
+    fetch('/api/getClassesForLanding')
+      .then((res) => res.json())
+      .then((data) => {
+        setClasses(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Błąd pobierania zajęć:', err);
+        setLoading(false);
+      });
+      /*const res = fetch('/api/generateResults', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_zajec: 1,
+        }),
+      });*/
+      
+  }, []);
+
+  // Grupowanie zajęć według przedmiotu (kolumny)
+  const groupedClasses = classes.reduce((acc, item) => {
+    if (!acc[item.przedmiot]) {
+      acc[item.przedmiot] = [];
+    }
+    acc[item.przedmiot].push(item);
+    return acc;
+  }, {} as Record<string, zajecia[]>);
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-600">Ładowanie zajęć...</div>;
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="min-h-screen bg-gray-50 p-8">
+      <h1 className="text-3xl font-bold text-center mb-10 text-gray-800">
+        Rozdzielanie zadań na zajęciach
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {Object.entries(groupedClasses).map(([przedmiot, zajeciaList]) => {
+          // Najbliższe zajęcia to pierwszy element w posortowanej liście dla danego przedmiotu
+          const upcomingClass = zajeciaList[0];
+
+          return (
+            <div
+              key={przedmiot}
+              className="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between border border-gray-100"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <div>
+                <h2 className="text-xl font-semibold text-indigo-600 mb-4 pb-2 border-b border-gray-100">
+                  {przedmiot}
+                </h2>
+
+                {upcomingClass ? (
+                  <div className="bg-indigo-50/50 rounded-lg p-4 mb-6 border border-indigo-100">
+                    <p className="text-xs uppercase tracking-wider font-semibold text-indigo-500 mb-1">
+                      Najbliższe zajęcia
+                    </p>
+                    <p className="text-lg font-bold text-gray-800 mb-3">
+                      {new Date(upcomingClass.data).toDateString()}
+                    </p>
+
+                    {upcomingClass.zadania_link ? (
+                      <a
+                        href={upcomingClass.zadania_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline inline-flex items-center gap-1 font-medium"
+                      >
+                        🔗 Link do zadań
+                      </a>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">Brak linku do zadań</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic mb-6">Brak nadchodzących zajęć w tej kategorii.</p>
+                )}
+              </div>
+
+              {upcomingClass && (
+                <div className="space-y-2">
+                  <Link
+                    href={`/zapisy/${upcomingClass.id}`}
+                    className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition shadow-sm"
+                  >
+                    Zapisz się na zajęcia
+                  </Link>
+                  {upcomingClass.czy_wyniki && <Link
+                    href={`/wyniki/${upcomingClass.id}`}
+                    className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition"
+                  >
+                    Wyświetl wyniki
+                  </Link>}
+                  
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </main>
   );
 }
