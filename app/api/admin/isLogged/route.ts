@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// Force this route to be dynamic so Next.js doesn't try to prerender it
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
     try {
         const cookieStore = await cookies();
