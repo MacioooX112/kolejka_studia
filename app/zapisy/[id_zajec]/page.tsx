@@ -22,7 +22,13 @@ function ZapisyForm() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/getClassDetails?id_zajec=${id_zajec}`)
+    fetch(`/api/getClassDetails`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id_zajec })
+    })
       .then((res) => res.json())
       .then((data) => {
         setZajecie(data);

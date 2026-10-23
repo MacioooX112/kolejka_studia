@@ -10,13 +10,6 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // -------------------------------------------------------------
-    // Endpoint: /api/getClassesForLanding
-    // Opis działania: 
-    // Endpoint pobiera z bazy danych (Prisma) listę zajęć, w której 
-    // Data jest większa bądź równa aktualnej (Data >= now), posortowaną rosnąco.
-    // Zwraca tablicę obiektów zajęć (zawierającą id, Data, przedmiot, link_do_zadań).
-    // -------------------------------------------------------------
     fetch('/api/getClassesForLanding')
       .then((res) => res.json())
       .then((data) => {
@@ -27,14 +20,7 @@ export default function LandingPage() {
         console.error('Błąd pobierania zajęć:', err);
         setLoading(false);
       });
-      /*const res = fetch('/api/generateResults', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id_zajec: 1,
-        }),
-      });*/
-      
+
   }, []);
 
   // Grupowanie zajęć według przedmiotu (kolumny)

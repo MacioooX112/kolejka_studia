@@ -17,13 +17,25 @@ function WynikiContent() {
     async function fetchData() {
       try {
         // 1. Pobieramy szczegóły zajęć (w tym pole czy_wyniki)
-        const zajeciaRes = await fetch(`/api/getClassDetails?id_zajec=${id_zajec}`);
+        const zajeciaRes = await fetch(`/api/getClassDetails`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id_zajec })
+        });
         const zajeciaData = await zajeciaRes.json();
         setZajecie(zajeciaData);
 
         // 2. Jeśli wyniki są dostępne (czy_wyniki === true), pobieramy je z API
         if (zajeciaData && zajeciaData.czy_wyniki) {
-          const wynikiRes = await fetch(`/api/getResults?id_zajec=${id_zajec}`);
+          const wynikiRes = await fetch(`/api/getResults`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id_zajec })
+          });
           const wynikiData = await wynikiRes.json();
           if (Array.isArray(wynikiData)) {
             setWynikiList(wynikiData);

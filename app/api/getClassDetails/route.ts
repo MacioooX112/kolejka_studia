@@ -3,10 +3,10 @@ import db from "@/lib/db";
 import { NextResponse } from "next/server";
 
 
-export async function GET(req: Request){
+export async function POST(req: Request){
     try{
-        const { searchParams } = new URL(req.url);
-        const id_zajec = searchParams.get("id_zajec");
+        const body = await req.json();
+        const { id_zajec } = body;
         const zajecia = await db.query<zajecia>("SELECT * FROM zajecia WHERE id = $1", [id_zajec])
         return NextResponse.json(zajecia.rows[0]);
     }catch(err){

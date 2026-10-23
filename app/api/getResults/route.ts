@@ -3,10 +3,10 @@ import db from "@/lib/db";
 import { NextResponse } from "next/server";
 
 
-export async function GET(req: Request){
+export async function POST(req: Request){
     try{
-        const { searchParams } = new URL(req.url);
-        const id_zajec = searchParams.get('id_zajec');
+         const body = await req.json();
+        const { id_zajec } = body;
         
         const q1 = "SELECT zgloszenia.id, zgloszenia.imie, zgloszenia.nazwisko, zgloszenia.id_zajec, zgloszenia.liczba_plusow, wyniki.pozycja  FROM wyniki JOIN zgloszenia ON wyniki.id_zgloszenia = zgloszenia.id WHERE zgloszenia.id_zajec = $1";
         const res1 = await db.query<wynikItem>(q1, [id_zajec])
